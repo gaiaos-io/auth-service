@@ -35,7 +35,7 @@ enum OAuthIntent {
   LINK = 2;
 }
 
-message PrimaryEmailRegisteRequest {
+message PrimaryEmailRegisterRequest {
   string email = 1;
   string password = 2;
 }

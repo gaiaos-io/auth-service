@@ -6,20 +6,22 @@ option go_package = "github.com/gaiaos-io/auth-service/proto/v1;authpb";
 import "google/protobuf/empty.proto";
 
 service AuthService {
+  // Email-Based Authentication
   rpc PrimaryEmailRegister(PrimaryEmailRegisterRequest) returns (AuthResponse);
   rpc PrimaryEmailLogin(PrimaryEmailLoginRequest) returns (AuthResponse);
-
-  rpc StartOAuth(StartOAuthRequest) returns (StartOAuthResponse);
-  rpc FinishOAuth(FinishOAuthRequest) returns (AuthResponse);
-  
-  rpc RefreshToken(RefreshTokenRequest) returns (AuthResponse);
-  
-  rpc Logout(LogoutRequest) returns (google.protobuf.Empty);
-
   rpc UpdatePrimaryEmail(UpdatePrimaryEmailRequest) returns (google.protobuf.Empty);
   rpc VerifyPrimaryEmail(VerifyPrimaryEmailRequest) returns (google.protobuf.Empty);
+
+  // OAuth-Based Authentication
+  rpc StartOAuth(StartOAuthRequest) returns (StartOAuthResponse);
+  rpc FinishOAuth(FinishOAuthRequest) returns (AuthResponse);
   rpc UnlinkOAuth(UnlinkOAuthRequest) returns (google.protobuf.Empty);
 
+  // Token & Session Management
+  rpc RefreshToken(RefreshTokenRequest) returns (AuthResponse);  
+  rpc Logout(LogoutRequest) returns (google.protobuf.Empty);
+
+  // User Info
   rpc GetMe(GetMeRequest) returns (UserResponse);
 }
 
@@ -45,6 +47,14 @@ message PrimaryEmailLoginRequest {
   string password = 2;
 }
 
+message UpdatePrimaryEmailRequest {
+  string email = 1;
+}
+
+message VerifyPrimaryEmailRequest {
+  string token = 1;
+}
+
 message StartOAuthRequest {
   OAuthProvider provider = 1;
   OAuthIntent intent = 2;
@@ -58,23 +68,15 @@ message FinishOAuthRequest {
   string state = 4;
 }
 
+message UnlinkOAuthRequest {
+  string provider = 1;
+}
+
 message RefreshTokenRequest {
   string refresh_token = 1;
 }
 
 message LogoutRequest {}
-
-message UpdatePrimaryEmailRequest {
-  string email = 1;
-}
-
-message VerifyPrimaryEmailRequest {
-  string token = 1;
-}
-
-message UnlinkOAuthRequest {
-  string provider = 1;
-}
 
 message GetMeRequest {}
 

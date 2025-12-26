@@ -1,0 +1,96 @@
+# =========================
+# Environment
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# JetBrains IDEs
+# =========================
+.idea/
+*.iml
+*.iws
+out/
+
+# =========================
+# VS Code
+# =========================
+.vscode/
+.vscode-test/
+.history/
+
+# =========================
+# Go build artifacts
+# =========================
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Binaries
+bin/
+dist/
+build/
+
+# =========================
+# Go tooling
+# =========================
+coverage.*
+*.coverprofile
+profile.cov
+
+# Go workspace / modules
+go.work
+go.work.sum
+
+# Go test cache
+.testdata/
+
+# =========================
+# Protobuf / gRPC generated files
+# =========================
+*.pb.go
+*_grpc.pb.go
+*_pb.go
+
+proto/gen/
+
+# =========================
+# gRPC / Protobuf tools
+# =========================
+# Buf
+.buf/
+buf.gen.yaml.lock
+
+# Protoc plugins (local installs)
+protoc-gen-*
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+
+# =========================
+# Docker
+# =========================
+docker-compose.override.yml
+*.pid
+
+# =========================
+# Temporary / misc
+# =========================
+tmp/
+temp/
+.cache/
+

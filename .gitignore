@@ -57,8 +57,6 @@ go.work.sum
 *_grpc.pb.go
 *_pb.go
 
-proto/gen/
-
 # =========================
 # gRPC / Protobuf tools
 # =========================

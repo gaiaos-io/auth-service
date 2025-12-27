@@ -15,20 +15,12 @@ type GrpcServer struct {
 
 // Email-Based Authentication
 
-func (*GrpcServer) PrimaryEmailRegister(ctx context.Context, req *authpb.PrimaryEmailRegisterRequest) (*authpb.AuthResponse, error) {
-	panic("AuthService.PrimaryEmailRegister not implemented")
+func (*GrpcServer) EmailRegister(ctx context.Context, req *authpb.EmailRegisterRequest) (*authpb.AuthResponse, error) {
+	panic("AuthService.EmailRegister not implemented")
 }
 
-func (*GrpcServer) PrimaryEmailLogin(ctx context.Context, req *authpb.PrimaryEmailLoginRequest) (*authpb.AuthResponse, error) {
-	panic("AuthService.PrimaryEmailLogin not implemented")
-}
-
-func (*GrpcServer) UpdatePrimaryEmail(ctx context.Context, req *authpb.UpdatePrimaryEmailRequest) (*emptypb.Empty, error) {
-	panic("AuthService.UpdatePrimaryEmail not implemented")
-}
-
-func (*GrpcServer) VerifyPrimaryEmail(ctx context.Context, req *authpb.VerifyPrimaryEmailRequest) (*emptypb.Empty, error) {
-	panic("AuthService.VerifyPrimaryEmail not implemented")
+func (*GrpcServer) EmailLogin(ctx context.Context, req *authpb.EmailLoginRequest) (*authpb.AuthResponse, error) {
+	panic("AuthService.EmailLogin not implemented")
 }
 
 // OAuth-Based Authentication
@@ -55,7 +47,15 @@ func (*GrpcServer) Logout(ctx context.Context, req *authpb.LogoutRequest) (*empt
 	panic("AuthService.Logout not implemented")
 }
 
-// User Info
+// User Management
+
+func (*GrpcServer) UpdateContactEmail(ctx context.Context, req *authpb.UpdateContactEmailRequest) (*emptypb.Empty, error) {
+	panic("AuthService.UpdateContactEmail not implemented")
+}
+
+func (*GrpcServer) VerifyContactEmail(ctx context.Context, req *authpb.VerifyContactEmailRequest) (*emptypb.Empty, error) {
+	panic("AuthService.VerifyContactEmail not implemented")
+}
 
 func (*GrpcServer) GetMe(ctx context.Context, req *authpb.GetMeRequest) (*authpb.UserResponse, error) {
 	panic("AuthService.GetMe not implemented")

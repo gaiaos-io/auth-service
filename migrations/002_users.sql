@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS users (
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-	primary_email CITEXT UNIQUE,
-	primary_email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+	contact_email CITEXT UNIQUE,
+	contact_email_verified BOOLEAN NOT NULL DEFAULT FALSE,
 	
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -21,7 +21,7 @@ BEGIN
 		NEW.updated_at	IS DISTINCT FROM OLD.updated_at
     THEN
         RAISE EXCEPTION
-            'Only primary_email and primary_email_verified may be updated on users';
+            'Only contact_email and contact_email_verified may be updated on users';
     END IF;
 
 	NEW.updated_at = now();

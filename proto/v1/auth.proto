@@ -7,11 +7,9 @@ import "google/protobuf/empty.proto";
 
 service AuthService {
   // Email-Based Authentication
-  rpc PrimaryEmailRegister(PrimaryEmailRegisterRequest) returns (AuthResponse);
-  rpc PrimaryEmailLogin(PrimaryEmailLoginRequest) returns (AuthResponse);
-  rpc UpdatePrimaryEmail(UpdatePrimaryEmailRequest) returns (google.protobuf.Empty);
-  rpc VerifyPrimaryEmail(VerifyPrimaryEmailRequest) returns (google.protobuf.Empty);
-
+  rpc EmailRegister(EmailRegisterRequest) returns (AuthResponse);
+  rpc EmailLogin(EmailLoginRequest) returns (AuthResponse);
+  
   // OAuth-Based Authentication
   rpc StartOAuth(StartOAuthRequest) returns (StartOAuthResponse);
   rpc FinishOAuth(FinishOAuthRequest) returns (AuthResponse);
@@ -21,7 +19,9 @@ service AuthService {
   rpc RefreshToken(RefreshTokenRequest) returns (AuthResponse);  
   rpc Logout(LogoutRequest) returns (google.protobuf.Empty);
 
-  // User Info
+  // User Management
+  rpc UpdateContactEmail(UpdateContactEmailRequest) returns (google.protobuf.Empty);
+  rpc VerifyContactEmail(VerifyContactEmailRequest) returns (google.protobuf.Empty);
   rpc GetMe(GetMeRequest) returns (UserResponse);
 }
 
@@ -37,21 +37,21 @@ enum OAuthIntent {
   LINK = 2;
 }
 
-message PrimaryEmailRegisterRequest {
+message EmailRegisterRequest {
   string email = 1;
   string password = 2;
 }
 
-message PrimaryEmailLoginRequest {
+message EmailLoginRequest {
   string email = 1;
   string password = 2;
 }
 
-message UpdatePrimaryEmailRequest {
+message UpdateContactEmailRequest {
   string email = 1;
 }
 
-message VerifyPrimaryEmailRequest {
+message VerifyContactEmailRequest {
   string token = 1;
 }
 

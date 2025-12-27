@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS password_credentials (
-	user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+	auth_identity_id UUID PRIMARY KEY REFERENCES auth_identities(id) ON DELETE CASCADE,
 	
 	password_hash VARCHAR(255) NOT NULL,	
 

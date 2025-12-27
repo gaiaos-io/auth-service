@@ -22,9 +22,9 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
 CREATE OR REPLACE FUNCTION email_verifications_update_guard()
 RETURNS TRIGGER AS $$
 BEGIN
-	IF OLD.revoked_at IS NOT NULL THEN
+	IF OLD.revoked_at IS NOT NULL OR OLD.expires_at <= now() THEN
         RAISE EXCEPTION
-            'refresh_tokens cannot be updated after revocation';
+            'refresh_tokens cannot be updated after revocation or expiration';
     END IF;
 	
 	IF
@@ -54,7 +54,8 @@ EXECUTE FUNCTION refresh_tokens_update_guard();
 -- ########
 
 CREATE INDEX IF NOT EXISTS refresh_tokens_user_idx
-ON refresh_tokens(user_id);
+ON refresh_tokens(user_id)
+WHERE revoked_at IS NULL;
 
 CREATE INDEX IF NOT EXISTS refresh_tokens_expires_at_idx
 ON refresh_tokens(expires_at)

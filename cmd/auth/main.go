@@ -6,9 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 
+	"github.com/gaiaos-io/auth-service/internal/config"
 	"github.com/gaiaos-io/auth-service/internal/infrastructure/grpcserver"
 )
 
@@ -19,33 +19,21 @@ func main() {
 	}
 	defer logger.Sync()
 
-	env := os.Getenv("ENV")
-	if env == "" {
-		env = "development"
-	}
+	cfg := config.LoadConfig(logger)
 
-	if env != "production" {
-		if err := godotenv.Load(); err != nil {
-			logger.Warn("No .env file found")
-		}
-	}
-
-	addr := os.Getenv("AUTH_GRPC_ADDR")
-	if addr == "" {
-		addr = ":50051"
-	}
+	logger.Info("starting service", zap.String("ENV", cfg.Env))
 
 	authService := grpcserver.NewAuthServiceServer()
 
 	loggingIntercepter := grpcserver.UnaryLoggingInterceptor(logger)
 
-	server, err := grpcserver.NewServer(addr, authService, loggingIntercepter)
+	server, err := grpcserver.NewServer(cfg.GRPCAddr, authService, loggingIntercepter)
 	if err != nil {
 		logger.Fatal("failed to create gRPC server", zap.Error(err))
 	}
 
 	go func() {
-		logger.Info("gRPC server starting", zap.String("addr", addr))
+		logger.Info("gRPC server starting", zap.String("addr", cfg.GRPCAddr))
 		if err := server.Start(); err != nil {
 			logger.Fatal("gRPC server failed", zap.Error(err))
 		}

@@ -4,26 +4,90 @@ package auth.v1;
 option go_package = "github.com/gaiaos-io/auth-service/proto/v1;authpb";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// ============================================================================
+// AuthService — Public API
+// ============================================================================
 
 service AuthService {
-  // Email-Based Authentication
-  rpc EmailRegister(EmailRegisterRequest) returns (AuthResponse);
-  rpc EmailLogin(EmailLoginRequest) returns (AuthResponse);
-  
-  // OAuth-Based Authentication
-  rpc StartOAuth(StartOAuthRequest) returns (StartOAuthResponse);
-  rpc FinishOAuth(FinishOAuthRequest) returns (AuthResponse);
+  // ─────────────────────────────────
+  // Identity
+  // ─────────────────────────────────
+  rpc GetMe(GetMeRequest) returns (UserResponse);
+
+  // ─────────────────────────────────
+  // Authentication
+  // ─────────────────────────────────
+
+  // Email-password
+  rpc EmailPasswordRegister(EmailPasswordRegisterRequest) returns (AuthResponse);
+  rpc EmailPasswordLogin(EmailPasswordLoginRequest) returns (AuthResponse);
+
+  // OAuth
+  rpc StartOAuthLogin(StartOAuthRequest) returns (StartOAuthResponse);
+  rpc FinishOAuthLogin(FinishOAuthRequest) returns (AuthResponse);
+
+  // ─────────────────────────────────
+  // Step-Up Authentication
+  // ─────────────────────────────────
+
+  // Email-password
+  rpc EmailPasswordReauthenticate(EmailPasswordReauthenticateRequest) returns (ReauthenticateResponse);
+
+  // OAuth
+  rpc StartOAuthReauthenticate(StartOAuthRequest) returns (StartOAuthResponse);
+  rpc FinishOAuthReauthenticate(FinishOAuthRequest) returns (ReauthenticateResponse);
+
+  // ─────────────────────────────────
+  // Session & Token Management
+  // ─────────────────────────────────
+  rpc RefreshToken(RefreshTokenRequest) returns (AuthResponse);
+  rpc Logout(LogoutRequest) returns (google.protobuf.Empty);
+  rpc RevokeSession(RevokeSessionRequest) returns (google.protobuf.Empty);
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse);
+
+  // ─────────────────────────────────
+  // Credentials & Linking
+  // ─────────────────────────────────
+
+  // Password lifecycle
+  rpc ChangePassword(ChangePasswordRequest) returns (google.protobuf.Empty);
+  rpc RequestPasswordReset(RequestPasswordResetRequest) returns (google.protobuf.Empty);
+  rpc ConfirmPasswordReset(ConfirmPasswordResetRequest) returns (google.protobuf.Empty);
+
+  // Email-password linking
+  rpc EmailPasswordLink(EmailPasswordLinkRequest) returns (google.protobuf.Empty);
+
+  // OAuth linking
+  rpc StartOAuthLink(StartOAuthRequest) returns (StartOAuthResponse);
+  rpc FinishOAuthLink(FinishOAuthRequest) returns (google.protobuf.Empty);
   rpc UnlinkOAuth(UnlinkOAuthRequest) returns (google.protobuf.Empty);
 
-  // Token & Session Management
-  rpc RefreshToken(RefreshTokenRequest) returns (AuthResponse);  
-  rpc Logout(LogoutRequest) returns (google.protobuf.Empty);
+  // ─────────────────────────────────
+  // Account Metadata & Verification
+  // ─────────────────────────────────
+  rpc RequestContactEmailUpdate(RequestContactEmailUpdateRequest) returns (google.protobuf.Empty);
+  rpc VerifyEmail(VerifyEmailRequest) returns (google.protobuf.Empty);
 
-  // User Management
-  rpc UpdateContactEmail(UpdateContactEmailRequest) returns (google.protobuf.Empty);
-  rpc VerifyContactEmail(VerifyContactEmailRequest) returns (google.protobuf.Empty);
-  rpc GetMe(GetMeRequest) returns (UserResponse);
+  // ─────────────────────────────────
+  // Account State & Lifecycle
+  // ─────────────────────────────────
+  rpc DisableAccount(DisableAccountRequest) returns (google.protobuf.Empty);
+  rpc ReactivateAccount(ReactivateAccountRequest) returns (google.protobuf.Empty);
+
+  rpc RequestAccountDeletion(RequestAccountDeletionRequest) returns (google.protobuf.Empty);
+  rpc CancelAccountDeletion(CancelAccountDeletionRequest) returns (google.protobuf.Empty);
+
+  // ─────────────────────────────────
+  // Token Introspection
+  // ─────────────────────────────────
+  rpc IntrospectToken(IntrospectTokenRequest) returns (IntrospectTokenResponse);
 }
+
+// ============================================================================
+// Enums
+// ============================================================================
 
 enum OAuthProvider {
   OAUTH_PROVIDER_UNSPECIFIED = 0;
@@ -35,55 +99,34 @@ enum OAuthIntent {
   OAUTH_INTENT_UNSPECIFIED = 0;
   LOGIN = 1;
   LINK = 2;
+  REAUTHENTICATE = 3;
 }
 
-message EmailRegisterRequest {
-  string email = 1;
-  string password = 2;
+enum UserStatus {
+  USER_STATUS_UNSPECIFIED = 0;
+  ACTIVE = 1;
+  PENDING = 2;
+  DISABLED = 3;
 }
 
-message EmailLoginRequest {
-  string email = 1;
-  string password = 2;
+enum UserRole {
+  USER_ROLE_UNSPECIFIED = 0;
+  ADMIN = 1;
+  CITIZEN = 2;
+  RESEARCHER = 3;
+  RANGER = 4;
 }
 
-message UpdateContactEmailRequest {
-  string email = 1;
-}
-
-message VerifyContactEmailRequest {
-  string token = 1;
-}
-
-message StartOAuthRequest {
-  OAuthProvider provider = 1;
-  OAuthIntent intent = 2;
-  string redirect_url = 3;
-}
-
-message FinishOAuthRequest {
-  OAuthProvider provider = 1;
-  OAuthIntent intent = 2;
-  string code = 3;
-  string state = 4;
-}
-
-message UnlinkOAuthRequest {
-  string provider = 1;
-}
-
-message RefreshTokenRequest {
-  string refresh_token = 1;
-}
-
-message LogoutRequest {}
+// ============================================================================
+// Common / Identity
+// ============================================================================
 
 message GetMeRequest {}
 
 message UserResponse {
-  string id = 1;
-  string email = 2;
-  bool email_verified = 3;
+  string user_id = 1;
+  UserStatus user_status = 2;
+  repeated UserRole user_roles = 3;
 }
 
 message AuthResponse {
@@ -92,6 +135,154 @@ message AuthResponse {
   UserResponse user = 3;
 }
 
+// ============================================================================
+// Email-Password Authentication
+// ============================================================================
+
+message EmailPasswordLoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message EmailPasswordRegisterRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message EmailPasswordLinkRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message EmailPasswordReauthenticateRequest {
+  string password = 1;
+}
+
+// ============================================================================
+// OAuth
+// ============================================================================
+
+message StartOAuthRequest {
+  OAuthProvider provider = 1;
+  OAuthIntent intent = 2;
+  string redirect_uri = 3;
+}
+
 message StartOAuthResponse {
   string authorization_url = 1;
 }
+
+message FinishOAuthRequest {
+  OAuthProvider provider = 1;
+  string code = 2;
+  string state = 3;
+}
+
+message UnlinkOAuthRequest {
+  OAuthProvider provider = 1;
+}
+
+// ============================================================================
+// Step-Up Authentication
+// ============================================================================
+
+message ReauthenticateResponse {
+  string reauth_token = 1;
+}
+
+// ============================================================================
+// Sessions
+// ============================================================================
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message LogoutRequest {
+  bool all_sessions = 1;
+}
+
+message ListSessionsRequest {}
+
+message ListSessionsResponse {
+  repeated Session sessions = 1;
+}
+
+message Session {
+  string session_id = 1;
+  string device_name = 2;
+  string ip_address = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp last_used_at = 5;
+}
+
+message RevokeSessionRequest {
+  string session_id = 1;
+}
+
+// ============================================================================
+// Account Management
+// ============================================================================
+
+message ChangePasswordRequest {
+  string current_password = 1;
+  string new_password = 2;
+}
+
+message RequestPasswordResetRequest {
+  string email = 1;
+}
+
+message ConfirmPasswordResetRequest {
+  string reset_code = 1;
+  string new_password = 2;
+}
+
+message RequestContactEmailUpdateRequest {
+  string new_email = 1;
+}
+
+// ============================================================================
+// Account Lifecycle
+// ============================================================================
+
+message DisableAccountRequest {
+  string user_id = 1;
+  string reason = 2;
+}
+
+message ReactivateAccountRequest {
+  string user_id = 1;
+  string reason = 2;
+}
+
+message RequestAccountDeletionRequest {
+  string reauth_token = 1;
+}
+
+message CancelAccountDeletionRequest {
+  string cancel_token = 1;
+  string reauth_token = 2;
+}
+
+// ============================================================================
+// Verification
+// ============================================================================
+
+message VerifyEmailRequest {
+  string token = 1;
+}
+
+// ============================================================================
+// Token Introspection
+// ============================================================================
+
+message IntrospectTokenRequest {
+  string token = 1;
+}
+
+message IntrospectTokenResponse {
+  bool active = 1;
+  UserResponse user = 2;
+}
+

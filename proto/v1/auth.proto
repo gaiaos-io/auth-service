@@ -14,7 +14,7 @@ service AuthService {
   // ─────────────────────────────────
   // Identity
   // ─────────────────────────────────
-  rpc GetMe(GetMeRequest) returns (UserResponse);
+  rpc GetMe(GetMeRequest) returns (AccountResponse);
 
   // ─────────────────────────────────
   // Authentication
@@ -102,15 +102,15 @@ enum OAuthIntent {
   REAUTHENTICATE = 3;
 }
 
-enum UserStatus {
-  USER_STATUS_UNSPECIFIED = 0;
+enum AccountStatus {
+  account_STATUS_UNSPECIFIED = 0;
+  UNVERIFIED = 1;
   ACTIVE = 1;
-  PENDING = 2;
-  DISABLED = 3;
+  DISABLED = 2;
 }
 
-enum UserRole {
-  USER_ROLE_UNSPECIFIED = 0;
+enum AccountRole {
+  account_ROLE_UNSPECIFIED = 0;
   ADMIN = 1;
   CITIZEN = 2;
   RESEARCHER = 3;
@@ -123,16 +123,16 @@ enum UserRole {
 
 message GetMeRequest {}
 
-message UserResponse {
-  string user_id = 1;
-  UserStatus user_status = 2;
-  repeated UserRole user_roles = 3;
+message AccountResponse {
+  string account_id = 1;
+  AccountStatus account_status = 2;
+  repeated AccountRole account_roles = 3;
 }
 
 message AuthResponse {
   string access_token = 1;
   string refresh_token = 2;
-  UserResponse user = 3;
+  AccountResponse account = 3;
 }
 
 // ============================================================================
@@ -247,12 +247,12 @@ message RequestContactEmailUpdateRequest {
 // ============================================================================
 
 message DisableAccountRequest {
-  string user_id = 1;
+  string account_id = 1;
   string reason = 2;
 }
 
 message ReactivateAccountRequest {
-  string user_id = 1;
+  string account_id = 1;
   string reason = 2;
 }
 
@@ -283,6 +283,6 @@ message IntrospectTokenRequest {
 
 message IntrospectTokenResponse {
   bool active = 1;
-  UserResponse user = 2;
+  AccountResponse account = 2;
 }
 

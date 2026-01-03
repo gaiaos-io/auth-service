@@ -5,8 +5,9 @@ import (
 )
 
 type Config struct {
-	Env      string
-	GRPCAddr string
+	Env    string
+	Server ServerConfig
+	Crypto CryptoConfig
 }
 
 func LoadConfig(logger *zap.Logger) *Config {
@@ -22,7 +23,12 @@ func LoadConfig(logger *zap.Logger) *Config {
 		}
 	}
 
-	cfg.GRPCAddr, err = GetEnv("AUTH_GRPC_ADDR")
+	cfg.Server, err = loadServerConfig()
+	if err != nil {
+		logger.Fatal("%v", zap.Error(err))
+	}
+
+	cfg.Crypto, err = loadCryptoConfig()
 	if err != nil {
 		logger.Fatal("%v", zap.Error(err))
 	}

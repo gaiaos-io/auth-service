@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -21,19 +22,21 @@ func main() {
 
 	cfg := config.LoadConfig(logger)
 
+	addr := fmt.Sprintf("%s%d", cfg.Server.Host, cfg.Server.Port)
+
 	logger.Info("starting service", zap.String("ENV", cfg.Env))
 
 	authService := grpcserver.NewAuthServiceServer()
 
 	loggingIntercepter := grpcserver.UnaryLoggingInterceptor(logger)
 
-	server, err := grpcserver.NewServer(cfg.GRPCAddr, authService, loggingIntercepter)
+	server, err := grpcserver.NewServer(addr, authService, loggingIntercepter)
 	if err != nil {
 		logger.Fatal("failed to create gRPC server", zap.Error(err))
 	}
 
 	go func() {
-		logger.Info("gRPC server starting", zap.String("addr", cfg.GRPCAddr))
+		logger.Info("gRPC server starting", zap.String("addr", addr))
 		if err := server.Start(); err != nil {
 			logger.Fatal("gRPC server failed", zap.Error(err))
 		}

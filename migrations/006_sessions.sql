@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 
     -- Device metadata
     account_agent TEXT,
-    ip_address TEXT,
+    ip_address INET,
     device_label TEXT,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

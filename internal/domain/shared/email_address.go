@@ -6,20 +6,30 @@ import (
 	"strings"
 )
 
+var validEmailPattern = regexp.MustCompile(
+	`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$`,
+)
+
 type EmailAddress struct {
 	value string
 }
 
 func NewEmailAddress(address string) (*EmailAddress, error) {
 	address = strings.TrimSpace(strings.ToLower(address))
+	emailAddress := &EmailAddress{value: address}
 
-	validEmailPattern := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$`)
-
-	if validEmailPattern.MatchString(address) {
-		return &EmailAddress{}, errors.New("invalid email address")
+	if err := emailAddress.IsValid(); err != nil {
+		return nil, err
 	}
 
-	return &EmailAddress{value: address}, nil
+	return emailAddress, nil
+}
+
+func (address EmailAddress) IsValid() error {
+	if validEmailPattern.MatchString(address.value) {
+		return errors.New("invalid email address")
+	}
+	return nil
 }
 
 func (address EmailAddress) String() string {

@@ -28,6 +28,12 @@ func (provider AuthProvider) ValidateProviderData(providerSubject ProviderSubjec
 		return err
 	}
 
+	if providerEmail != nil {
+		if err := providerEmail.IsValid(); err != nil {
+			return err
+		}
+	}
+
 	if provider == ProviderEmailPassword &&
 		(providerEmail == nil || providerEmail.String() != providerSubject.value) {
 		return errors.New("for EmailPassword provider, providerEmail is required and it must have the same value as providerSubject")

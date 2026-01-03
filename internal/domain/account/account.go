@@ -12,7 +12,7 @@ type Account struct {
 	id           uuid.UUID
 	status       AccountStatus
 	roles        []AccountRole
-	ContactEmail *shared.EmailAddress
+	contactEmail *shared.EmailAddress
 }
 
 func NewAccount(status AccountStatus) (*Account, error) {
@@ -32,12 +32,30 @@ func NewAccount(status AccountStatus) (*Account, error) {
 
 // Getters
 
-func (account *Account) ID() uuid.UUID {
+func (account Account) ID() uuid.UUID {
 	return account.id
 }
 
-func (account *Account) Status() AccountStatus {
+func (account Account) Status() AccountStatus {
 	return account.status
+}
+
+func (account Account) ContactEmail() *shared.EmailAddress {
+	return account.contactEmail
+}
+
+// Contact Email
+
+func (account *Account) SetContactEmail(email *shared.EmailAddress) error {
+	if err := email.IsValid(); err != nil {
+		return err
+	}
+	account.contactEmail = email
+	return nil
+}
+
+func (account *Account) RemoveContactEmail() {
+	account.contactEmail = nil
 }
 
 // Roles

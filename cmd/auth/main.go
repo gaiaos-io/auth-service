@@ -20,9 +20,17 @@ func main() {
 	}
 	defer logger.Sync()
 
-	cfg := config.LoadConfig(logger)
+	spec, err := config.LoadEnvVars()
+	if err != nil {
+		logger.Fatal("failed to load env vars", zap.Error(err))
+	}
 
-	addr := fmt.Sprintf("%s%d", cfg.Server.Host, cfg.Server.Port)
+	cfg, err := config.LoadConfig(spec)
+	if err != nil {
+		logger.Fatal("failed to load config", zap.Error(err))
+	}
+
+	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 
 	logger.Info("starting service", zap.String("ENV", cfg.Env))
 

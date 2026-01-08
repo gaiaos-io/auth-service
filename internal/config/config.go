@@ -1,37 +1,26 @@
 package config
 
-import (
-	"go.uber.org/zap"
-)
-
 type Config struct {
 	Env    string
 	Server ServerConfig
 	Crypto CryptoConfig
 }
 
-func LoadConfig(logger *zap.Logger) *Config {
+func LoadConfig(spec *specification) (*Config, error) {
 	cfg := &Config{}
 	var err error
 
-	cfg.Env, err = GetEnv("ENV")
+	cfg.Env = string(spec.Env)
+
+	cfg.Server, err = loadServerConfig(spec)
 	if err != nil {
-		if cfg.Env == "" {
-			logger.Fatal("failed to load environment variables", zap.Error(err))
-		} else {
-			logger.Warn("failed to load environment variables, using defaults", zap.Error(err))
-		}
+		return nil, err
 	}
 
-	cfg.Server, err = loadServerConfig()
+	cfg.Crypto, err = loadCryptoConfig(spec)
 	if err != nil {
-		logger.Fatal("%v", zap.Error(err))
+		return nil, err
 	}
 
-	cfg.Crypto, err = loadCryptoConfig()
-	if err != nil {
-		logger.Fatal("%v", zap.Error(err))
-	}
-
-	return cfg
+	return cfg, nil
 }

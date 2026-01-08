@@ -5,16 +5,16 @@ type CryptoConfig struct {
 	JWT      JWTConfig
 }
 
-func loadCryptoConfig() (CryptoConfig, error) {
+func loadCryptoConfig(spec *specification) (CryptoConfig, error) {
 	cfg := CryptoConfig{}
 	var err error
 
-	cfg.Argon2id, err = loadArgon2idConfig()
+	cfg.Argon2id, err = loadArgon2idConfig(spec)
 	if err != nil {
 		return cfg, err
 	}
 
-	cfg.JWT, err = loadJWTConfig()
+	cfg.JWT, err = loadJWTConfig(spec)
 	if err != nil {
 		return cfg, err
 	}

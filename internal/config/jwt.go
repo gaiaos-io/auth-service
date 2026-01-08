@@ -1,6 +1,9 @@
 package config
 
-import "errors"
+import (
+	"encoding/pem"
+	"errors"
+)
 
 type JWTConfig struct {
 	Issuer        string
@@ -10,34 +13,14 @@ type JWTConfig struct {
 	PublicKeyPEM  string
 }
 
-func loadJWTConfig() (JWTConfig, error) {
+func loadJWTConfig(spec *specification) (JWTConfig, error) {
 	cfg := JWTConfig{}
-	var err error
 
-	cfg.Issuer, err = GetEnvStr("JWT_ISSUER")
-	if err != nil {
-		return cfg, err
-	}
-
-	cfg.Audience, err = GetEnvStr("JWT_AUDIENCE")
-	if err != nil {
-		return cfg, err
-	}
-
-	cfg.AccessTTLMin, err = GetEnvInt("JWT_ACCESS_TTL_MIN")
-	if err != nil {
-		return cfg, err
-	}
-
-	cfg.PrivateKeyPEM, err = GetEnvStr("JWT_PRIVATE_KEY_PEM")
-	if err != nil {
-		return cfg, err
-	}
-
-	cfg.PublicKeyPEM, err = GetEnvStr("JWT_PUBLIC_KEY_PEM")
-	if err != nil {
-		return cfg, err
-	}
+	cfg.Issuer = spec.JwtIssuer
+	cfg.Audience = spec.JwtAudience
+	cfg.AccessTTLMin = spec.JwtAccessTtlMin
+	cfg.PrivateKeyPEM = spec.JwtPrivateKeyPem
+	cfg.PublicKeyPEM = spec.JwtPublicKeyPem
 
 	if err := cfg.validate(); err != nil {
 		return cfg, err
@@ -53,14 +36,20 @@ func (config JWTConfig) validate() error {
 	if config.Audience == "" {
 		return errors.New("jwt audience must not be empty")
 	}
-	if config.AccessTTLMin <= 0 {
-		return errors.New("jwt access token ttl must be positive")
+	if config.AccessTTLMin < 5 || 30 < config.AccessTTLMin {
+		return errors.New("jwt access token ttl must be between 5 and 30 minutes")
 	}
 	if config.PrivateKeyPEM == "" {
 		return errors.New("jwt private key must not be empty")
 	}
+	if block, _ := pem.Decode([]byte(config.PrivateKeyPEM)); block == nil {
+		return errors.New("jwt private key is not valid PEM")
+	}
 	if config.PublicKeyPEM == "" {
 		return errors.New("jwt public key must not be empty")
+	}
+	if block, _ := pem.Decode([]byte(config.PublicKeyPEM)); block == nil {
+		return errors.New("jwt public key is not valid PEM")
 	}
 
 	return nil

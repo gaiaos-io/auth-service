@@ -2,111 +2,58 @@ package config
 
 import (
 	"fmt"
-	"os"
-	"strconv"
+	"strings"
 
-	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
 )
+
+type Env string
 
 const (
-	EnvDevelopment = "development"
-	EnvStaging     = "staging"
-	EnvProduction  = "production"
+	EnvDevelopment Env = "development"
+	EnvStaging     Env = "staging"
+	EnvProduction  Env = "production"
 )
 
-type EnvVar struct {
-	Default  string
-	Critical bool
-}
-
-var EnvVars = map[string]EnvVar{
-	"ENV":            {Default: EnvDevelopment, Critical: true},
-	"AUTH_GRPC_ADDR": {Default: ":50051", Critical: true},
-}
-
-func LoadEnv() (string, error) {
-	env, err := GetEnv("ENV")
-	if err != nil {
-		return "", err
-	}
-
-	switch env {
-	case EnvDevelopment, EnvStaging:
-		if err := godotenv.Load(".env." + env); err != nil {
-			return env, fmt.Errorf("failed to load .env file for %s: %w", env, err)
-		}
-	case EnvProduction:
+func (env *Env) Set(value string) error {
+	lowerValue := strings.ToLower(value)
+	switch lowerValue {
+	case "development":
+		*env = EnvDevelopment
+	case "staging":
+		*env = EnvStaging
+	case "production":
+		*env = EnvProduction
 	default:
-		return "", fmt.Errorf("invalid ENV value: %s", env)
+		return fmt.Errorf("invalid env: %s. Must be one of development, staging, production", value)
 	}
-
-	return env, nil
+	return nil
 }
 
-func GetEnvStr(key string) (string, error) {
-	envVar, err := GetEnv(key)
-	if err != nil {
-		return "", err
-	}
-	return envVar, nil
+type specification struct {
+	Env                 Env    `default:"development" required:"true"`
+	ServerHost          string `default:"0.0.0.0" required:"true" split_words:"true"`
+	ServerPort          int    `default:"50051" required:"true" split_words:"true"`
+	ServerReadTimeout   int    `split_words:"true"`
+	ServerWriteTimeout  int    `split_words:"true"`
+	JwtIssuer           string `default:"gaiaos-auth-service" required:"true" split_words:"true"`
+	JwtAudience         string `default:"gaiaos-auth-service-clients" required:"true" split_words:"true"`
+	JwtAccessTtlMin     int    `default:"15" required:"true" split_words:"true"`
+	JwtPrivateKeyPem    string `required:"true" split_words:"true"`
+	JwtPublicKeyPem     string `required:"true" split_words:"true"`
+	Argon2idMemoryMib   uint32 `default:"64" required:"true" split_words:"true"`
+	Argon2idIterations  uint32 `default:"3" required:"true" split_words:"true"`
+	Argon2idParallelism uint8  `default:"1" required:"true" split_words:"true"`
+	Argon2idSaltLength  uint32 `default:"16" required:"true" split_words:"true"`
+	Argon2idKeyLength   uint32 `default:"32" required:"true" split_words:"true"`
 }
 
-func GetEnvInt(key string) (int, error) {
-	envVar, err := GetEnv(key)
+func LoadEnvVars() (*specification, error) {
+	var s specification
+	err := envconfig.Process("auth_service", &s)
 	if err != nil {
-		return 0, nil
+		return nil, err
 	}
 
-	intEnvVar, err := strconv.Atoi(envVar)
-	if err != nil {
-		return 0, fmt.Errorf("error converting %s env var to int: %v", key, err)
-	}
-
-	return intEnvVar, nil
-}
-
-func GetEnvUint8(key string) (uint8, error) {
-	envVar, err := GetEnv(key)
-	if err != nil {
-		return 0, err
-	}
-
-	uint8EnvVar, err := strconv.ParseUint(envVar, 10, 8)
-	if err != nil {
-		return 0, fmt.Errorf("error converting %s env var to uint8: %v", key, err)
-	}
-
-	return uint8(uint8EnvVar), nil
-}
-
-func GetEnvUint32(key string) (uint32, error) {
-	envVar, err := GetEnv(key)
-	if err != nil {
-		return 0, err
-	}
-
-	uint32EnvVar, err := strconv.ParseUint(envVar, 10, 32)
-	if err != nil {
-		return 0, fmt.Errorf("error converting %s env var to uint32: %v", key, err)
-	}
-
-	return uint32(uint32EnvVar), err
-}
-
-func GetEnv(key string) (string, error) {
-	val := os.Getenv(key)
-
-	if val == "" {
-		envVar, exists := EnvVars[key]
-		if !exists {
-			return "", fmt.Errorf("unknown environment variable: %s", key)
-		}
-
-		if envVar.Critical && envVar.Default == "" {
-			return "", fmt.Errorf("required environment variable missing: %s", key)
-		}
-		return envVar.Default, nil
-	}
-
-	return val, nil
+	return &s, nil
 }

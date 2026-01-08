@@ -3,6 +3,7 @@ module github.com/gaiaos-io/auth-service
 go 1.25.5
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	go.uber.org/zap v1.27.1
